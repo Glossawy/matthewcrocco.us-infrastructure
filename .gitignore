@@ -1,0 +1,9 @@
+.idea
+
+scripts/log/**/*
+code/**/*
+
+!scripts/log/.gitkeep
+!code/.gitkeep
+
+*.log
