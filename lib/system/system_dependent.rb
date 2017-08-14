@@ -6,11 +6,11 @@ module System
 
     module ClassMethods
       SYSTEM_REGEX_MAPPING = {
-          windows: /mswin|mingw/,
-          mac: /darwin/,
-          darwin9: /darwin9/,
-          linux: /linux/,
-          freebsd: /freebsd/
+        windows: /mswin|mingw/,
+        mac: /darwin/,
+        darwin9: /darwin9/,
+        linux: /linux/,
+        freebsd: /freebsd/
       }.freeze
 
       def system_dependent_method(method, osname)
@@ -34,7 +34,7 @@ module System
         end
       end
 
-      private
+      protected
 
       def system_regexp_for_name(osname)
         return if osname.nil?
@@ -57,14 +57,14 @@ module System
         return value if value.is_a? Proc
         -> { `#{value}` }
       end
+    end
 
-      def convert_value(value, convert)
-        return value if convert.nil?
-        return convert.call(result) if convert.respond_to? :call
-        value.send(convert)
-      rescue
-        raise 'Can only handle converters of type: Nil, Proc, Symbol or String'
-      end
+    def convert_value(value, convert)
+      return value if convert.nil?
+      return convert.call(value) if convert.respond_to? :call
+      value.send(convert)
+    # rescue
+    #   raise "Can only handle converters of type: Nil, Proc, Symbol or String. Found #{convert.class}"
     end
 
     def system_name

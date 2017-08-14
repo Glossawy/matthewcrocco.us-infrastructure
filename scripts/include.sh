@@ -42,3 +42,36 @@ step() {
   check_status
   set -e
 }
+
+random_hexstring() {
+  hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random | tr '[:upper:]' '[:lower:]'
+}
+
+vagrant_run() {
+  local power=$(vagrant status | grep "(virtualbox)$" | awk '{print $2}')
+  local password=$(random_hexstring)
+  echo ":: Using VAGRANT_PG_PASSWORD=${password}"
+
+  if [ "$power" == "running" ]; then
+    if [[ "${1:-}" == "reload" ]]
+    then
+      echo ":: Rebooting vagrant VM"
+      VAGRANT_PG_PASSWORD=${password} vagrant reload --provision
+      RESULT=$?
+    else
+      echo ":: Running vagrant provisioner"
+      VAGRANT_PG_PASSWORD=${password} vagrant provision
+      RESULT=$?
+    fi
+  else
+    echo ":: Starting vagrant VM"
+    VAGRANT_PG_PASSWORD=${password} vagrant up --provision
+    RESULT=$?
+  fi
+  if [ $RESULT -ne 0 ]
+  then
+    echo "!! vagrant provision failed. Rerun or report incident."
+    echo "!!"
+    echo "!! If the puppet provisioner is the cause, this can leave the vagrant box without full configuration"
+  fi
+}

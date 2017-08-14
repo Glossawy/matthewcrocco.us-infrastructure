@@ -3,6 +3,13 @@ require_relative './system_dependent'
 module System
   module ResourceAccess
     include SystemDependent
+    def self.included(base)
+      base.include(SystemDependent)
+    end
+
+    def self.bytes_to_mb(bytes)
+      bytes / 1024 / 1024
+    end
 
     cpu_count_actions = [
       [:darwin9, 'hwprefs cpu_count'],
@@ -43,11 +50,5 @@ module System
                            normalizer: ->(x) { bytes_to_mb x.to_i },
                            default: 1024,
                            os_actions: memory_actions
-
-    private
-
-    def bytes_to_mb(bytes)
-      bytes / 1024 / 1024
-    end
   end
 end
